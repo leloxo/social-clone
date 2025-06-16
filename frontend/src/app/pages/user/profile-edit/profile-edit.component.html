@@ -1,0 +1,42 @@
+<div class="h-screen max-w-6xl">
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+        <div class="flex justify-center items-center mb-8">
+            <div class="relative cursor-pointer" (click)="fileInput.click()">
+                <img 
+                    [src]="previewUrl || user?.profileImageUrl || 'assets/avatar.png'" 
+                    alt="Profile picture"
+                    class="w-[150px] h-[150px] rounded-full object-cover"
+                >
+                <div class="flex justify-center items-center flex-col absolute top-0 left-0 right-0 bottom-0 bg-black/40 rounded-full opacity-0 transition-opacity duration-300 hover:opacity-100">
+                    <i class="pi pi-camera text-white" style="font-size: 32px;"></i>
+                    <span class="mt-1 text-white">Click to edit image</span>
+                </div>
+            </div>
+            <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden">
+        </div>
+    
+        <div>
+            <label for="biography" class="block text-xl font-medium mb-2">Biography</label>
+            <textarea 
+                id="biography" 
+                formControlName="biography" 
+                rows="4" 
+                cols="100"
+                maxlength="{{maxBioLength}}" 
+                pTextarea 
+                [autoResize]="true" 
+                placeholder="Write something about yourself..."
+                class="w-full"
+            ></textarea>
+            <div class="flex justify-between text-sm mb-5" style="color: var(--text-color-secondary);">
+                <span class="ml-1">Max {{maxBioLength}} characters</span>
+                <span class="mr-1">{{bioLength}}/{{maxBioLength}}</span>
+            </div>
+        </div>
+        
+        <div class="flex justify-end gap-4">
+            <p-button styleClass="p-button-outlined" (click)="onCancel()">Cancel</p-button>
+            <p-button type="submit" [loading]="isLoading">Save Changes</p-button>
+        </div>
+    </form>
+</div>

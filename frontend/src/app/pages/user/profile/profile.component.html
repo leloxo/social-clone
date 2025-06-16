@@ -1,0 +1,180 @@
+<div [ngClass]="posts().length ? 'h-full' : 'h-screen'" class="card flex justify-center min-h-[100vh]">
+  @if (isLoading()) {
+      <div class="w-full max-w-6xl">
+        <div class="flex items-center justify-center mb-8 pl-8">
+          <div class="mr-32 flex-shrink-8">
+            <p-skeleton shape="circle" size="10rem" styleClass="mr-2" />
+          </div>
+    
+          <div class="flex-1">
+            <div class="flex items-center mb-4">
+              <p-skeleton width="15rem" height="2rem" styleClass="mb-2" />
+            </div>
+    
+            <div class="flex mb-6 gap-8 text-[16px]">
+              <p-skeleton width="15rem" styleClass="mb-2" />
+            </div>
+    
+            <div class="text-[16px]">
+              <p-skeleton width="10rem" styleClass="mb-2" />
+            </div>
+          </div>
+        </div>
+    
+        <div class="flex justify-center border-t border-gray-200 mb-4"></div>
+  
+        <div class="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-1">
+          @for (i of [0,1,2]; track i) {
+            <div class="relative w-full">
+              <p-skeleton height="380px"/>
+            </div>
+          }
+        </div>
+      </div>
+  } @else {
+    @if (!isEditMode()) {
+      <div class="w-full max-w-6xl">
+        <div class="flex items-center justify-center mb-8 pl-8">
+          <div class="mr-32 flex-shrink-8">
+            <img 
+              [src]="user()?.profileImageUrl || 'assets/avatar.png'" 
+              alt="Profile picture" 
+              class="w-[150px] h-[150px] rounded-full object-cover"
+              loading="lazy"
+            >
+          </div>
+    
+          <div class="flex-1">
+            <div class="flex items-center mb-4">
+              @if (user(); as user) {
+                <p class="text-[28px] font-normal mr-4 mb-0">{{ user.userName }}</p>
+              } @else {
+                <p class="text-[28px] font-normal mr-4 mb-0">username</p>
+              }
+  
+              <div class="flex items-center gap-1">
+                @if (isOwnProfile()) {
+                  <p-button 
+                    styleClass="p-button-outlined" 
+                    (click)="enterEditMode()">
+                    Edit Profile
+                  </p-button>
+                } @else {
+                  @if (!isFollowing()) {
+                    <p-button (click)="onFollow()" [raised]="true">Follow</p-button>
+                  } @else {
+                    <p-button (click)="onUnfollow()" [raised]="true">Unfollow</p-button>
+                  }
+                }
+  
+                <p-menu #menu [popup]="true" [model]="isOwnProfile() ? menuItemsOwnProfile : menuItemsUser" />
+                <p-button 
+                  icon="pi pi-ellipsis-v" 
+                  styleClass="p-button-text p-button-rounded" 
+                  (click)="menu.toggle($event)">
+                </p-button>
+              </div>
+            </div>
+    
+            <div class="flex mb-6 gap-8 text-[16px]">
+              <span>
+                <strong class="font-semibold mr-1">{{ postCount() }}</strong> 
+                {{ postCount() === 1 ? 'post' : 'posts'}}
+              </span>
+              <span 
+                class="cursor-pointer" 
+                (click)="showFollowDetail(FollowType.Followers)">
+                <strong class="font-semibold mr-1">{{ followerCount() }}</strong> 
+                {{ followerCount() === 1 ? 'follower' : 'followers'}}
+              </span>
+              <span 
+                class="cursor-pointer" 
+                (click)="showFollowDetail(FollowType.Following)">
+                <strong class="font-semibold mr-1">{{ followingCount() }}</strong> 
+                following
+              </span>
+            </div>
+    
+            @if (user(); as user) {
+              <div class="text-[16px]">
+                <p class="font-bold mb-4">{{ user.firstName }} {{ user.lastName }}</p>
+                <p class="m-0 mb-1 text-base leading-6">
+                  {{ user.biography || 'No biography provided' }}
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+    
+        <div class="flex justify-center border-t border-gray-200 mb-4"></div>
+  
+        @defer (when posts().length > 0) {
+          <div class="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-1">
+            @for (post of posts(); track post.id) {
+              <div class="relative w-full pb-[100%] ">
+                <img 
+                  [src]="post.imageUrl" 
+                  [alt]="'Post by ' + (user()?.userName || 'user')"
+                  class="absolute w-full h-full"
+                  loading="lazy"
+                >
+                <div class="absolute top-0 left-0 w-full h-full bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer" 
+                  (click)="showPostDetail(post)">
+                  <div class="flex items-center justify-center text-white text-xl gap-2">
+                    <span class="mr-4">
+                      <i class="pi pi-heart mr-1"></i> {{ post.likeCount }}
+                    </span>
+                    <span>
+                      <i class="pi pi-comment mr-1"></i> {{ post.commentCount }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @placeholder {
+          @if (isOwnProfile()) {
+            <div class="flex items-center justify-center flex-col py-16 text-center">
+              <i class="pi pi-camera mb-4" style="font-size: 50px; color: var(--text-color-secondary);"></i>
+              <p class="text-3xl font-normal mb-2 text-[var(--text-color)]">No Posts Yet</p>
+              <p class="text-[var(--text-color-secondary)] mb-4">When you share photos, they will appear on your profile</p>
+              <p-button 
+                (click)="navigateToUpload()">
+                Share your first photo
+              </p-button>
+            </div>
+          }
+        }
+      </div>
+    } @else {
+      <app-profile-edit
+        [user]="user()"
+        [isLoading]="isProfileUpdateLoading()"
+        (saveChanges)="onSaveChanges($event)"
+        (cancelEdit)="exitEditMode()"
+      ></app-profile-edit>
+    }
+  }
+
+  <p-toast></p-toast>
+</div>
+
+@if (isPostDetailMode()) {
+  <app-post-detail
+    [display]="true"
+    [post]="selectedPost()"
+    (close)="closePostDetail()"
+    (postUpdated)="onPostUpdated($event)"
+    (postDeleted)="onPostDeleted($event)"
+  />
+}
+
+@if (isFollowDetailMode()) {
+  <app-follow-detail
+    [type]="followType()"
+    [display]="true"
+    [followers]="followers()"
+    [following]="following()"
+    (close)="closeFollowDetail()"
+  />
+}

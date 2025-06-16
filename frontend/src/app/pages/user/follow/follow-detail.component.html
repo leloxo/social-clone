@@ -1,0 +1,89 @@
+<div>
+    <p-dialog 
+        [(visible)]="display" 
+        [breakpoints]="{ '960px': '75vw', '640px': '90vw' }" 
+        [style]="{ width: '30vw', height: '80vh' }"
+        [modal]="true" 
+        [draggable]="false" 
+        [resizable]="false" 
+        (onHide)="closeModal()"
+        maskStyleClass="backdrop-blur-xs"
+        [header]="type.toString()"
+    >
+        <div>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input 
+                    type="text" 
+                    pInputText 
+                    placeholder="Type to search users..." 
+                    [(ngModel)]="searchTerm" 
+                    (input)="onSearch()"
+                    class="w-full h-13"
+                />
+            </p-iconfield>
+        </div>
+
+        @if (isLoading()) {
+            <div class="mt-4 overflow-y-auto">
+                <ul>
+                    @for (user of [1,2,3]; track {}) {
+                        <p-skeleton height="4rem" styleClass="mb-2" />
+                    }
+                </ul>
+            </div>
+        } @else {
+            <div class="mt-4 overflow-y-auto">
+                @if (type === FollowType.Followers) {
+                    <ul>
+                        @for (user of filteredFollowers; track user.id) {
+                            <li
+                                (click)="viewUserProfile(user.userName)"
+                                class="flex items-center gap-3 p-2 rounded-[var(--content-border-radius)] cursor-pointer 
+                                    hover:bg-[var(--surface-hover)] transition-[var(--element-transition-duration)]"
+                            >
+                                <img 
+                                    [src]="user.profileImageUrl || 'assets/avatar.png'" 
+                                    alt="Profile picture" 
+                                    class="w-12 h-12 rounded-full object-cover"
+                                    loading="lazy"
+                                />
+                                <span class="font-medium text-[18px]">{{ user.userName }}</span>
+                            </li>
+                        }
+                    </ul>
+        
+                    @if (filteredFollowers.length === 0) {
+                        <div class="text-center p-4 text-[var(--text-color-secondary)]">
+                            No users found
+                        </div>
+                    }
+                } @else if (type === FollowType.Following) {
+                    <ul>
+                        @for (user of filteredFollowing; track user.id) {
+                            <li 
+                                (click)="viewUserProfile(user.userName)"
+                                class="flex items-center gap-3 p-2 rounded-[var(--content-border-radius)] cursor-pointer 
+                                    hover:bg-[var(--surface-hover)] transition-[var(--element-transition-duration)]"
+                            >
+                                <img 
+                                    [src]="user.profileImageUrl || 'assets/avatar.png'" 
+                                    alt="Profile picture" 
+                                    class="w-12 h-12 rounded-full object-cover"
+                                    loading="lazy"
+                                />
+                                <span class="font-medium text-[18px]">{{ user.userName }}</span>
+                            </li>
+                        }
+                    </ul>
+        
+                    @if (filteredFollowing.length === 0) {
+                        <div class="text-center p-4 text-[var(--text-color-secondary)]">
+                            No users found
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </p-dialog>
+</div>

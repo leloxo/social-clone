@@ -1,0 +1,81 @@
+<div class="card h-screen">
+    <div class="flex flex-col items-center justify-center gap-4 max-w-6xl mx-auto">
+        <!-- Image Upload -->
+        <div class="relative flex border border-dashed border-[var(--text-color-secondary)] items-center justify-center w-full md:w-1/2 aspect-square cursor-pointer"
+             (click)="fileInput.click()">
+            
+            @if (selectedFile(); as file) {
+                <div class="w-full h-full">
+                    <img 
+                        [src]="previewUrl()" 
+                        [alt]="file.name" 
+                        class="w-full h-full" 
+                    />
+    
+                    <div class="flex justify-center items-center flex-col absolute top-0 left-0 right-0 bottom-0 bg-black/40 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                        <i class="pi pi-upload text-white" style="font-size: 32px;"></i>
+                        <span class="mt-1 text-white">Click to upload image</span>
+                    </div>
+                </div>
+            } @else {
+                <div class="flex flex-col items-center justify-center gap-2 p-4 text-center">
+                    <i class="pi pi-image text-5xl" style="font-size: 32px;"></i>
+                    <p>Click to upload an image</p>
+                </div>
+            }
+            
+            <input #fileInput
+                   type="file"
+                   accept="image/*"
+                   class="hidden"
+                   (change)="onManualFileSelect($event)">
+                   
+            <p-fileupload #fu
+                          [style]="{'display': 'none'}"
+                          mode="basic"
+                          name="demo[]"
+                          accept="image/*"
+                          maxFileSize="1000000"
+                          [auto]="true"
+                          (onSelect)="onFileSelect($event)">
+            </p-fileupload>
+        </div>
+        
+        <!-- Caption form -->
+        <div class="w-full md:w-1/2 mt-4 md:mt-0">
+            <form [formGroup]="form" (ngSubmit)="uploadPost()">
+                <div class="mb-4">
+                    <label for="caption" class="block text-xl font-medium mb-2">Caption</label>
+                    <textarea 
+                        id="caption" 
+                        formControlName="caption"
+                        pTextarea 
+                        [rows]="3" 
+                        [autoResize]="true"
+                        [maxlength]="MAX_CAPTION_LENGTH" 
+                        class="w-full" 
+                        placeholder="Write a caption for your post...">
+                    </textarea>
+
+                    <div class="flex justify-between text-sm mb-3" style="color: var(--text-color-secondary);">
+                        <span class="ml-1">Max {{MAX_CAPTION_LENGTH}} characters</span>
+                        <span class="mr-1">{{form.controls.caption.value.length}}/{{MAX_CAPTION_LENGTH}}</span>
+                    </div>
+
+                    @if (form.controls.caption.errors?.['required'] && form.controls.caption.touched) {
+                        <p-message severity="error" variant="simple" size="small">Caption is required.</p-message>
+                    }
+                </div>
+                    
+                <p-button
+                    type="submit" 
+                    label="Post" 
+                    severity="primary" 
+                    [disabled]="!selectedFile() || form.invalid"
+                    styleClass="w-full"
+                    [loading]="isLoading()">
+                </p-button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+<div [ngClass]="posts().length ? 'h-full' : 'h-screen'" class="card flex justify-center items-center min-h-[100vh]">
+    @if (isLoading()) {
+        <div class="w-full max-w-screen-sm">
+            <div class="rounded-lg border-1" style="border-color: var(--surface-border)">
+                <div class="flex items-center p-4">
+                    <div class="flex gap-3 items-center w-full">
+                        <p-skeleton shape="circle" size="3rem" />
+                        <p-skeleton width="15rem"/>
+                    </div>
+                </div>
+    
+                <p-skeleton height="40rem"/>
+
+                <div class="pl-4 pt-2 pb-4 flex items-center justify-start text-xl gap-6">
+                    <i class="pi pi-heart-fill mr-1"></i>
+                    <i class="pi pi-comment mr-1"></i>
+                </div>
+    
+                <div class="pl-4 pb-4">
+                    <p-skeleton width="10rem"/>
+                </div>
+            </div>
+        </div>
+    } @else {
+        <div class="grid grid-cols-1 gap-8 w-full max-w-screen-sm">
+            <p-confirmdialog />
+            @for (post of posts(); track post.id) {
+                <div class="rounded-lg overflow-hidden border-1" style="border-color: var(--surface-border)">
+                    <div class="flex items-center p-4">
+                        <div class="flex gap-3 items-center w-full">
+                            <img 
+                                [src]="post.authorSummary.profileImageUrl || 'assets/avatar.png'" 
+                                alt="Profile of {{post.authorSummary.userName}}"
+                                class="w-10 h-10 rounded-full object-cover cursor-pointer"
+                                (click)="viewUserProfile(post.authorSummary.userName)"
+                            >
+                            <span 
+                                class="font-semibold text-lg cursor-pointer hover:text-[var(--text-color-secondary)]"
+                                (click)="viewUserProfile(post.authorSummary.userName)"
+                            >
+                                {{ post.authorSummary.userName }}
+                            </span>
+                            <span class="ml-2 text-md text-[var(--text-color-secondary)]">
+                                {{ calculateTimeSincePosted(post.createdAt) }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-end w-full">
+                            <p-menu #menu [model]="post.isOwnPost ? menuItemsOwnPost : menuItemsUser" [popup]="true" />
+                            <p-button
+                                icon="pi pi-ellipsis-v"
+                                class="mr-2"
+                                styleClass="p-button-text p-button-rounded" 
+                                (click)="menu.toggle($event); onSelectPost(post)">
+                            </p-button>
+                        </div>
+                    </div>
+        
+                    <div class="relative w-full pb-[100%]">
+                        <img 
+                            [src]="post.imageUrl" 
+                            [alt]="'Post by ' + post.authorSummary.userName"
+                            class="absolute top-0 left-0 w-full h-full border-t border-b" 
+                            style="border-color: var(--surface-border)"
+                            loading="lazy"
+                        >
+                    </div>
+        
+                    <div class="pl-4 pt-2 pb-4 flex items-center justify-start text-xl gap-6">
+                        <button 
+                            class="cursor-pointer hover:text-red-500" 
+                            (click)="onLike(post)"
+                        >
+                            @if (post.isLiked) {
+                                <i class="pi pi-heart-fill mr-1"></i>
+                            } @else {
+                                <i class="pi pi-heart mr-1"></i> 
+                            }
+                            {{ post.likeCount }}
+                        </button>
+
+                        <button 
+                            class="cursor-pointer hover:text-[var(--text-color-secondary)]" 
+                            (click)="onComment(post)"
+                        >
+                            <i class="pi pi-comment mr-1"></i> 
+                            {{ post.commentCount }}
+                        </button>
+                    </div>
+        
+                    <div class="pl-4 pb-4">
+                        <span 
+                            class="font-semibold mr-2 cursor-pointer hover:text-[var(--text-color-secondary)]" 
+                            (click)="viewUserProfile(post.authorSummary.userName)"
+                        >
+                            {{ post.authorSummary.userName }}
+                        </span>
+                        {{ post.caption }}
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (isDetailMode()) {
+    <app-post-detail
+        [display]="true"
+        [post]="selectedPost()"
+        (close)="closeDetailView()"
+        (postUpdated)="onPostUpdated($event)"
+        (postDeleted)="onPostDeleted($event)"
+    />
+}

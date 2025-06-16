@@ -1,0 +1,260 @@
+<app-dark-mode-toggle></app-dark-mode-toggle>
+
+<div class="flex items-center justify-center min-h-screen w-full overflow-x-hidden">
+    <div class="w-full max-w-3xl px-4 py-8">
+        <div class="card shadow-md">
+            <div class="w-full py-6 px-6 sm:px-10">
+                <div class="text-center mb-12">
+                    <h1 class="text-3xl font-medium mb-2">Create a new account</h1>
+                    <p class="text-sm text-muted-color">Fill in your details to get started</p>
+                </div>
+
+                <p-toast />
+                
+                <form [formGroup]="registrationForm" (ngSubmit)="onRegister()">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label for="firstName" class="block text-lg font-medium mb-2">First name</label>
+                            <div class="relative">
+                                <input 
+                                    pInputText 
+                                    id="firstName" 
+                                    type="text"
+                                    placeholder="Enter your first name" 
+                                    class="w-full mb-1"
+                                    formControlName="firstName"
+                                    [ngClass]="{'ng-invalid ng-dirty': firstName.invalid && firstName.touched}"
+                                />
+                                @if (firstName.valid && firstName.touched) {
+                                    <i class="pi pi-check text-green-500 absolute right-3 top-3"></i>
+                                }
+                            </div>
+                            
+                            <div class="min-h-6">
+                                @if (firstName.hasError('required') && firstName.touched) {
+                                    <p-message severity="error" text="First name is required" variant="simple" size="small"></p-message>
+                                }
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="lastName" class="block text-lg font-medium mb-2">Last name</label>
+                            <div class="relative">
+                                <input 
+                                    pInputText 
+                                    id="lastName" 
+                                    type="text" 
+                                    placeholder="Enter your last name"  
+                                    class="w-full mb-1"
+                                    formControlName="lastName"
+                                    [ngClass]="{'ng-invalid ng-dirty': lastName.invalid && lastName.touched}" 
+                                />
+                                @if (lastName.valid && lastName.touched) {
+                                    <i class="pi pi-check text-green-500 absolute right-3 top-3"></i>
+                                }
+                            </div>
+                            
+                            <div class="min-h-6">
+                                @if (lastName.hasError('required') && lastName.touched) {
+                                    <p-message severity="error" text="Last name is required" variant="simple" size="small"></p-message>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="userName" class="block text-lg font-medium mb-2">Username</label>
+                        <div class="relative"> 
+                            <input 
+                                pInputText 
+                                id="userName" 
+                                type="text" 
+                                placeholder="Choose a username" 
+                                class="w-full mb-1"
+                                formControlName="userName"
+                                [ngClass]="{'ng-invalid ng-dirty': userName.invalid && userName.touched}"
+                                (input)="checkUsernameAvailability()" 
+                            />
+                            @if (checkingUsername()) {
+                                <i class="pi pi-spinner pi-spin absolute right-3 top-3"></i>
+                            }
+                            @else if (!usernameExists() && userName.valid && userName.touched) {
+                                <i class="pi pi-check text-green-500 absolute right-3 top-3"></i>
+                            }
+                        </div>
+                        
+                        <div class="min-h-6"> 
+                            @if (userName.hasError('required') && userName.touched) {
+                                <p-message severity="error" text="Username is required" variant="simple" size="small"></p-message>
+                            }
+                            @if (usernameExists() && userName.valid) {
+                                <p-message severity="error" text="User with this username already exists" variant="simple" size="small"></p-message>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="block text-lg font-medium mb-2">Email</label>
+                        <div class="relative">
+                            <input 
+                                pInputText 
+                                id="email" 
+                                type="email" 
+                                placeholder="example@email.com"
+                                class="w-full mb-1"
+                                formControlName="email"
+                                [ngClass]="{'ng-invalid ng-dirty': email.invalid && email.touched}" 
+                            />
+                            @if (email.valid && email.touched) {
+                                <i class="pi pi-check text-green-500 absolute right-3 top-3"></i>
+                            }
+                        </div>
+                        
+                        <div class="min-h-6">
+                            @if (email.hasError('required') && email.touched) {
+                                <p-message severity="error" text="Email is required" variant="simple" size="small"></p-message>
+                            }
+                            @if (email.hasError('pattern') && email.touched) {
+                                <p-message severity="error" text="Please enter a valid email address" variant="simple" size="small"></p-message>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="block font-medium text-lg mb-2">Password</label>
+                        <p-password 
+                            id="password"
+                            formControlName="password"
+                            placeholder="Choose a password"
+                            [toggleMask]="true"
+                            [ngClass]="{'ng-invalid ng-dirty': password.invalid && password.touched}" 
+                            styleClass="mb-1 w-full" 
+                            [fluid]="true"
+                            mediumRegex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+                            strongRegex="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$"
+                        >
+
+                            <ng-template #footer>
+                                <p-divider />
+                                <ul class="pl-2 my-2 text-sm">
+                                    <li [ngClass]="validatePasswordStrength()[PasswordRequirements.lowerCase] ? 'text-green-500' : 'text-red-500'"
+                                        class="mb-1 flex items-center">
+                                        <i [class]="validatePasswordStrength()[PasswordRequirements.lowerCase] ? 'pi pi-check mr-2' : 'pi pi-times mr-2'"></i>
+                                        At least one lowercase letter
+                                    </li>
+                                    <li [ngClass]="validatePasswordStrength()[PasswordRequirements.upperCase] ? 'text-green-500' : 'text-red-500'"
+                                        class="mb-1 flex items-center">
+                                        <i [class]="validatePasswordStrength()[PasswordRequirements.upperCase] ? 'pi pi-check mr-2' : 'pi pi-times mr-2'"></i>
+                                        At least one uppercase letter
+                                    </li>
+                                    <li [ngClass]="validatePasswordStrength()[PasswordRequirements.number] ? 'text-green-500' : 'text-red-500'"
+                                        class="mb-1 flex items-center">
+                                        <i [class]="validatePasswordStrength()[PasswordRequirements.number] ? 'pi pi-check mr-2' : 'pi pi-times mr-2'"></i>
+                                        At least one number
+                                    </li>
+                                    <li [ngClass]="validatePasswordStrength()[PasswordRequirements.specialChar] ? 'text-green-500' : 'text-red-500'"
+                                        class="mb-1 flex items-center">
+                                        <i [class]="validatePasswordStrength()[PasswordRequirements.specialChar] ? 'pi pi-check mr-2' : 'pi pi-times mr-2'"></i>
+                                        At least one special character
+                                    </li>
+                                    <li [ngClass]="validatePasswordStrength()[PasswordRequirements.length] ? 'text-green-500' : 'text-red-500'"
+                                        class="mb-1 flex items-center">
+                                        <i [class]="validatePasswordStrength()[PasswordRequirements.length] ? 'pi pi-check mr-2' : 'pi pi-times mr-2'"></i>
+                                        Minimum 8 characters
+                                    </li>
+                                </ul>
+                            </ng-template>
+                        </p-password>
+                        
+                        <div class="min-h-6">
+                            @if (password.hasError('required') && password.touched) {
+                                <p-message severity="error" text="Password is required" variant="simple" size="small"></p-message>
+                            }
+                            @if (password.hasError('pattern') && password.touched) {
+                                <p-message severity="error" text="Password doesn't meet requirements" variant="simple" size="small"></p-message>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="block font-medium text-lg mb-2">Confirm password</label>
+                        <p-password 
+                            id="confirmPassword"
+                            formControlName="confirmPassword"
+                            placeholder="Confirm your password" 
+                            [toggleMask]="true"
+                            [ngClass]="{'ng-invalid ng-dirty': (confirmPassword.invalid || 
+                                password.value != confirmPassword.value) 
+                                && confirmPassword.touched}" 
+                            styleClass="w-full mb-1" 
+                            [fluid]="true"
+                            [feedback]="false" 
+                        >
+                        </p-password>
+                        
+                        <div class="min-h-6">
+                            @if (password.hasError('required') && password.touched) {
+                                <p-message severity="error" text="Please confirm your password" variant="simple" size="small"></p-message>
+                            } @else if (password.value != confirmPassword.value 
+                                && password.touched) {
+                                <p-message severity="error"  text="Passwords don't match" variant="simple" size="small"></p-message>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <p-panel header="DISCLAIMER" [toggleable]="true">
+                            <p>
+                                This application is intended solely for project showcase and demonstration purposes. 
+                                Please do not use real personal data when creating an account. 
+                                Any data entered is not protected under GDPR or other privacy regulations, as this platform is not intended for real-world use. 
+                                By using this application, you acknowledge that any information provided is for testing purposes only and may be publicly visible. 
+                                The developer assumes no responsibility for data privacy or security.
+                            </p>
+                        </p-panel>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-13 p-1">
+                        <p-checkbox
+                            inputId="disclaimerConfirm"
+                            [binary]="true"
+                            formControlName="disclaimerConfirmed">
+                        </p-checkbox>
+                        
+                        <label for="disclaimerConfirm" class="ml-2 text-sm cursor-pointer">
+                            I have read the disclaimer and understand that this application is for demonstration purposes only and agree not to use real personal data.
+                        </label>
+                    </div>
+                    
+                    <p-button 
+                        type="submit"
+                        label="Create account" 
+                        icon="pi pi-user-plus"
+                        [disabled]="registrationForm.invalid || isLoading()"
+                        [loading]="isLoading()"
+                        styleClass="w-full">
+                    </p-button>
+
+                    <div class="relative w-full mt-8">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-[var(--primary-contrast-color)]">Or</span>
+                        </div>
+                    </div>
+    
+                    <div class="flex items-center justify-center mt-6">
+                        <span class="font-medium no-underline text-right text-primary">
+                            Already have an account? 
+                            <b class="cursor-pointer hover:text-[var(--text-color-secondary)]" [routerLink]="['/login']">
+                                Sign in
+                            </b>
+                        </span>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
