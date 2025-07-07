@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, inject, Input, OnChanges, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { UserSummary } from '../../../models/user/user-summary.model';
 import { SkeletonModule } from 'primeng/skeleton';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TextareaModule } from 'primeng/textarea';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { UserSummary } from '../../../models/user/user-summary.model';
 
 export enum FollowType {
     Following = 'Following',

@@ -22,7 +22,6 @@ import { ToastModule } from 'primeng/toast';
 import { catchError, EMPTY, finalize, forkJoin, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import { AppError } from '../../../core/app-error.type';
 import { UserSummary } from '../../../models/user/user-summary.model';
-import { ErrorHandlingService } from '../../../services/error-handling.service';
 import { PostUtilsService } from '../../../services/post-utils.service';
 import { ToastService } from '../../../services/toast.service';
 import { PostDetailComponent } from "../../post/post-detail.component";
@@ -120,8 +119,8 @@ export class ProfileComponent implements OnInit {
         switchMap(() => {
           this.isFollowing.set(true);
           this.followerCount.update(count => count + 1);
-          
-          return this.followers().length > 0 
+
+          return this.followerCount() > 0 
             ? this.userService.fetchProfile().pipe(catchError(() => EMPTY))
             : of(null);
         })
@@ -215,7 +214,7 @@ export class ProfileComponent implements OnInit {
     );
 
     if (this.selectedPost()?.id === updatedPost.id) {
-      this.selectedPost.set(this.postUtils.mergePostUpdates(updatedPost, this.selectedPost()));
+      this.selectedPost.set(updatedPost);
     }
   }
 

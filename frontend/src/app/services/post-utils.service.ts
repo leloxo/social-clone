@@ -1,15 +1,17 @@
-import { DestroyRef, Injectable, inject } from '@angular/core';
-import { AuthService } from './auth.service';
-import { Post } from '../models/post/post.model';
-import { Comment } from '../models/post/comment.model';
-import { catchError, forkJoin, map, Observable, of } from 'rxjs';
-import { PostService } from './post.service';
+import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, forkJoin, map, Observable, of } from 'rxjs';
+import { Comment } from '../models/post/comment.model';
+import { Post } from '../models/post/post.model';
+import { AuthService } from './auth.service';
+import { PostService } from './post.service';
+import { ToastService } from './toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class PostUtilsService {
   private readonly authService = inject(AuthService);
   private readonly postService = inject(PostService);
+  private readonly toastService = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
   mergePostUpdates(updatedPost: Post, existingPost: Post | undefined): Post {
@@ -70,7 +72,9 @@ export class PostUtilsService {
         };
         updateFn(updatedPost);
       },
-      error: (err) => console.error('Failed to update like', err) // TODO: switch to toast?
+      error: () => {
+        this.toastService.error(post.isLiked ? 'Failed to unlike post' : 'Failed to like post');
+      }
     });
   }
 

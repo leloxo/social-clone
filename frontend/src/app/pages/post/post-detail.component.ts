@@ -157,19 +157,10 @@ export class PostDetailComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (response) => {
-                    const currentUsername = this.authService.getUsername();     
-                    // TODO: check todo ->               
-                    // TODO: issue with isOwnComment? Where to set
-                    
-                    const updatedComments = response.postDetails.comments.map((comment: Comment) => ({
-                        ...comment,
-                        isOwnComment: comment.authorSummary.userName === currentUsername,
-                    }));
-                    
-                    this.post = {
-                        ...response.postDetails,
-                        comments: updatedComments,
-                    };
+                    this.post = this.postUtils.mergePostUpdates(
+                        response.postDetails,
+                        this.post
+                    );
 
                     this.post = this.postUtils.sortCommentsByDate(this.post);                   
                     this.postUpdated.emit(this.post);
@@ -195,62 +186,10 @@ export class PostDetailComponent implements OnInit {
     onLike(post: Post | undefined): void {
         if (!post) return;
 
-        this.postService.isLikedByUser(post.id)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (response) => {
-                    if (response.success) {
-                        this.unlikePost(post);
-                    } else {
-                        this.likePost(post);
-                    }
-                },
-                error: () => {
-                    this.toastService.error('Failed to check like status');
-                }
-            });
-    }
-
-    private likePost(post: Post): void {
-        this.postService.likePost(post.id)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (response) => {
-                    if (this.post) {
-                        this.post = {
-                          ...this.post,
-                          likeCount: response.likeCount,
-                          isLiked: true
-                        };
-                        
-                        this.postUpdated.emit(this.post);
-                    }
-                },
-                error: () => {
-                    this.toastService.error('Failed to like post');
-                }
-            });
-    }
-
-    private unlikePost(post: Post): void {
-        this.postService.unlikePost(post.id)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (response) => {
-                    if (this.post) {
-                        this.post = {
-                          ...this.post,
-                          likeCount: response.likeCount,
-                          isLiked: false
-                        };
-                        
-                        this.postUpdated.emit(this.post);
-                    }
-                },
-                error: () => {
-                    this.toastService.error('Failed to unlike post');
-                }
-            });
+        this.postUtils.toggleLike(post, (updatedPost) => {
+            this.post = updatedPost;
+            this.postUpdated.emit(updatedPost);
+        })
     }
 
     calculateTimeSincePosted(date: Date | undefined): string {
@@ -281,9 +220,11 @@ export class PostDetailComponent implements OnInit {
           .subscribe({
             next: (response) => {
                 if (this.post) {
-                    this.post = {
-                      ...response.postDetails
-                    };
+                    
+                    this.post = this.postUtils.mergePostUpdates(
+                        response.postDetails,
+                        this.post
+                    );
       
                     this.post = this.postUtils.sortCommentsByDate(this.post);
                     this.postUpdated.emit(this.post);

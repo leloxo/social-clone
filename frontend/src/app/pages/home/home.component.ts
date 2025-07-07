@@ -64,7 +64,6 @@ export class HomeComponent implements OnInit {
     this.loadPosts();
   }
 
-  // TODO: understand
   onLike(post: Post): void {
     this.postUtils.toggleLike(post, (updatedPost) => {
       this.posts.update(posts => 
@@ -87,9 +86,7 @@ export class HomeComponent implements OnInit {
     );
 
     if (this.selectedPost()?.id === updatedPost.id) {
-      this.selectedPost.set(
-        this.postUtils.mergePostUpdates(updatedPost, this.selectedPost())
-      );
+      this.selectedPost.set(updatedPost);
     }
   }
 
@@ -117,27 +114,18 @@ export class HomeComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
         switchMap(page => {
           const posts = this.postUtils.markOwnership(page.content);
-          this.posts.set(posts);
           return this.postUtils.updatePostsLikeStatus(posts);
         }),
         finalize(() => this.isLoading.set(false))
       )
       .subscribe({
+        next: (updatedPosts) => {
+          this.posts.set(updatedPosts);
+        },
         error: () => {
           this.toastService.error('Failed to load feed');
         }
       });
-
-      // TODO: test if it works without this:
-      // .subscribe({
-      //   next: (updatedPosts) => {
-      //     this.posts.set(updatedPosts);
-      //   },
-      //   error: (err) => {
-      //     console.error('Failed to load feed:', err);
-      //     this.toastService.error('Failed to load feed');
-      //   }
-      // });
   }
 
   private confirmDelete(): void {
